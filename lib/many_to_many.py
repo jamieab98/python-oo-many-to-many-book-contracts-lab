@@ -7,18 +7,26 @@ class Author:
         self.name = name
         Author.all.append(self)
     
-    def books(self):
-        if not isinstance (self, Author):
-            print("Error")
-        else:
-            books = [contract["book"] for contract in Contract.all if contract["author"] == self]
-            print(books)
+    def __repr__(self):
+        return (f"Author {self.name}")
     
-    def sign_contracts(self, book, royalties):
-        Contract(self, book, royalties)
+    def books(self):
+        books = [contract.book for contract in Contract.all if contract.author == self]
+        return books
+    
+    def contracts(self):
+        contracts = [contract for contract in Contract.all if contract.author == self]
+        return contracts
+    
+    def sign_contract(self, book, date, royalties):
+        return (Contract(self, book, date, royalties))
     
     def total_royalties(self):
-        return ('''total amount of royalties from contracts''')
+        royalty_amount = 0
+        contracts = [contract for contract in Contract.all if contract.author == self]
+        for contract in contracts:
+            royalty_amount += contract.royalties
+        return royalty_amount
 
 class Book:
     all = []
@@ -31,23 +39,71 @@ class Book:
         return (f"Book {self.title}")
     
     def contracts(self):
-        return ('''List of related contracts''')
+        contracts = [contract for contract in Contract.all if contract.book == self]
+        return contracts
     
     def authors(self):
-        return ('''List of related authors''')
+        authors = [contract.author for contract in Contract.all if contract.book == self]
+        return authors
     
 
 class Contract:
     all = []
 
-    def __init__(self, author, book, royalties):
+    @property
+    def author(self):
+        return self._author
+    
+    @author.setter
+    def author(self, value):
+        if not isinstance(value, Author):
+            raise TypeError("The author must be an instance of Author")
+        else:
+            self._author = value
+    
+    @property
+    def book(self):
+        return self._book
+    
+    @book.setter
+    def book(self, value):
+        if not isinstance(value, Book):
+            raise TypeError("The book must be an instance of Book")
+        else:
+            self._book = value
+
+    @property
+    def date(self):
+        return self._date
+    
+    @date.setter
+    def date(self, value):
+        if not isinstance(value, str):
+            raise TypeError("The date must be a string")
+        else:
+            self._date = value
+    
+    @property
+    def royalties(self):
+        return self._royalties
+    
+    @royalties.setter
+    def royalties(self, value):
+        if not isinstance(value, int):
+            raise TypeError("The royatly amount must be an integer")
+        else:
+            self._royalties = value
+
+    def __init__(self, author, book, date, royalties):
         self.author = author
         self.book = book
-        self.date = datetime.now()
+        self.date = date
         self.royalties = royalties
+        Contract.all.append(self)
 
-        Contract.all.append({"author": self.author, "book": self.book, "date": self.date, "royalties": self.royalties})
-
+    def contracts_by_date(date):
+        contracts = [contract for contract in Contract.all if contract.date == date]
+        return (contracts)
 
 author1 = Author("Jamie")
 author2 = Author("Micahel")
@@ -56,9 +112,9 @@ book1 = Book("The Life of Pi")
 book2 = Book("The Subtle Art of Not Giving a F*ck")
 book3 = Book("If you Give a Mouse a Cookie")
 
-author1.sign_contracts(book1, 50)
-author1.sign_contracts(book2, 10)
-author2.sign_contracts(book2, 40)
-author2.sign_contracts(book3, 20)
+author1.sign_contract(book1, "1/1/2001", 50)
+author1.sign_contract(book2, "1/2/2001", 10)
+author2.sign_contract(book2, "1/3/2001", 40)
+author2.sign_contract(book3, "1/4/2001", 20)
 
-author1.books()
+author1.total_royalties()
