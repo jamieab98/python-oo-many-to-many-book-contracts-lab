@@ -7,12 +7,12 @@ class Author:
         self.name = name
         Author.all.append(self)
     
-    def __repr__(self):
-        return (f"Author: {self.name}")
-    
     def books(self):
-        books = [contract.book for contract in Contract.all if contract.author == self]
-        print(books)
+        if not isinstance (self, Author):
+            print("Error")
+        else:
+            books = [contract["book"] for contract in Contract.all if contract["author"] == self]
+            print(books)
     
     def sign_contracts(self, book, royalties):
         Contract(self, book, royalties)
@@ -45,7 +45,8 @@ class Contract:
         self.book = book
         self.date = datetime.now()
         self.royalties = royalties
-        Contract.all.append(self)
+
+        Contract.all.append({"author": self.author, "book": self.book, "date": self.date, "royalties": self.royalties})
 
 
 author1 = Author("Jamie")
